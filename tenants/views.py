@@ -38,8 +38,20 @@ class TenantsViewSet(ModelViewSet):
             )
 
         tenant = get_object_or_404(Tenant, pk=request.tenant.id)
-        input_serializer = self.serializer_class(tenant, data=form_data, partial=True)
-        input_serializer.is_valid(raise_exception=True)
-        input_serializer.save()
+        serializer = self.serializer_class(tenant, data=form_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        return Response(data=input_serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Get the current tenant info if the user belongs to it."""
+        tenant_user_exist = TenantMembership.objects.filter(user=request.user, company=request.tenant).exist()
+        if not tenant_user_exist:
+            return Response(
+                {"message": "User does not belong to this tenant."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = self.serializer_class(request.tenant)
+        return Response(serializer.data, status=status.HTTP_200_OK)

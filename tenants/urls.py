@@ -5,5 +5,6 @@ urlpatterns = [
     path('tenants/', TenantsViewSet.as_view({
         'post': 'create',
         'patch': 'partial_update',
+        'get': 'retrieve'
     }))
 ]
