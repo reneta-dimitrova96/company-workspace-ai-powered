@@ -22,7 +22,7 @@ class TenantsViewSet(ModelViewSet):
         )
 
         serializer = self.serializer_class(tenant)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
         """Partially update the current tenant if the user belongs to it."""
@@ -30,10 +30,11 @@ class TenantsViewSet(ModelViewSet):
         if not form_data:
             return Response(data={'message': "Invalid or missing form data."}, status=status.HTTP_400_BAD_REQUEST)
 
-        tenant_user = TenantMembership.objects.filter(user=request.user, company=request.tenant).first()
-        if not tenant_user:
+        tenant_user_exist = TenantMembership.objects.filter(user=request.user, company=request.tenant,
+                                                            role__in=['owner', 'admin']).exists()
+        if not tenant_user_exist:
             return Response(
-                {"message": "User does not belong to this tenant."},
+                {"message": "User does not have permission to update this tenant."},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -54,4 +55,4 @@ class TenantsViewSet(ModelViewSet):
             )
 
         serializer = self.serializer_class(request.tenant)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
