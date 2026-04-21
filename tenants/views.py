@@ -6,23 +6,12 @@ from rest_framework.viewsets import ModelViewSet
 
 from tenants.models import Tenant, TenantMembership
 from tenants.serializers import TenantSerializer
-from tenants.services import tenant_service
 
 
 class TenantsViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Tenant.objects.all()
     serializer_class = TenantSerializer
-
-    def create(self, request, *args, **kwargs):
-        """Create a tenant and assign the current user as owner."""
-        tenant = tenant_service.create_tenant(
-            owner_user=request.user,
-            tenant_data=request.data
-        )
-
-        serializer = self.serializer_class(tenant)
-        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
         """Partially update the current tenant if the user belongs to it."""
