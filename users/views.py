@@ -29,3 +29,25 @@ class OwnerRegisterView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class EmployeeRegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        try:
+            user = user_service.register_employee(request.data)
+        except ValueError as exc:
+            return Response(
+                {"message": str(exc)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {
+                "id": user.id,
+                "username": user.username,
+                "position": user.position,
+            },
+            status=status.HTTP_201_CREATED,
+        )

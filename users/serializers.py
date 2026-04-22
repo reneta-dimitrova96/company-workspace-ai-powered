@@ -32,3 +32,15 @@ class OwnerRegisterSerializer(serializers.ModelSerializer):
 
         user = User.objects.create_user(**validated_data)
         return user, tenant_data
+
+
+class EmployeeRegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "password",
+            "position",
+        ]
